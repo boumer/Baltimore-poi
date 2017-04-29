@@ -1,5 +1,8 @@
 require 'bundler/setup'
 require './config/database'
+require './lib/monument.rb'
+require 'pry'
+require 'csv'
 
 load 'neo4j/tasks/migration.rake'
 
@@ -20,19 +23,35 @@ end
 namespace :db do
   desc 'Seed the database'
   task :seed do
+    Neighborhood.delete_all
+    neighborhoods = []
     {
-      Neighborhood => 'neighborhoods',
       Library => 'libraries',
       Monument => 'monuments',
+      Museum => 'museums',
+      Park => 'parks',
+      ReligiousBuilding => 'religious_buildings',
+      Landmark => 'landmarks'
     }.each do |klass, file|
-      objects = CSV.read("#{file}.csv")
-      objects.each { |obj| klass.create obj }
-    end
-
-    neighborhoods = Neighborhood.all.to_a
-    Library.all.each do |library|
-      neighborhood = neighborhoods.find { |n| n.name == library.neighborhood_name }
-      neighborhood.libraries << library
+      puts "Seeding #{klass}"
+      klass.delete_all
+      CSV.foreach("data/#{file}.csv", headers: true) do |row|
+        hash = row.to_hash
+        hash.each do |k,v|
+          if v.nil?
+            next
+          end
+          v.gsub!("\n", " ")
+        end
+        if hash.key?("Location 1")
+          hash["address"] = hash.delete("Location 1")
+        end
+        if klass == Park
+          hash["neighborhood"] = hash.delete("district")
+        end
+        hash["neighborhood"] = Neighborhood.find_or_create_by(name: hash.fetch("neighborhood"))
+        klass.create hash
+      end
     end
   end
 end
