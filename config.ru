@@ -3,4 +3,4 @@ require './baltimore_poi'
 
 $LOAD_PATH << 'lib'
 
-run BaltimorePoi
+run BaltimorePOI
