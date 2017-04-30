@@ -55,3 +55,31 @@ namespace :db do
     end
   end
 end
+
+desc 'Geocode POI'
+task :geocode do
+  geocode = proc do |address|
+    response = Net::HTTP.get(URI("https://maps.googleapis.com/maps/api/geocode/json?address=#{address},Baltimore,MD&key=AIzaSyCw9xtudDTSAXj-XWba93DNETStZiD-81s"))
+    result = JSON.parse(response)
+    result
+      .dig('results', 0, 'geometry', 'location')
+      .values_at('lat', 'lng')
+  end
+
+  [
+    Library,
+    Monument,
+    Museum,
+    Park,
+    ReligiousBuilding,
+    Landmark,
+  ].each do |klass|
+    klass.where(coordinates: nil).each do |obj|
+      print "#{obj.class} (#{obj.uuid}): #{obj.address}"
+      coords = geocode[obj.address]
+      puts ": #{coords.inspect}"
+
+      obj.update(coordinates: p(coords))
+    end
+  end
+end

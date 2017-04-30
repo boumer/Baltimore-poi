@@ -8,6 +8,11 @@ require 'actions'
 class Layout
   include Clearwater::Component
 
+  def initialize
+    FetchNeighborhoods.call
+    FetchPointsOfInterest.call
+  end
+
   def render
     div([
       h1('Baltimore POI'),
@@ -15,12 +20,32 @@ class Layout
       when nil
         p('Fetching location')
       else
-        Google::Map.new(
-          center: current_location,
-          zoom: 13,
-        )
+        div([
+          select({ onchange: SelectNeighborhood }, [
+            option({ value: nil }, 'Select Neighborhood'),
+            neighborhoods.map { |n|
+              option({ value: n.id }, n.name)
+            },
+          ]),
+          select({ onchange: SelectPOIType }, [
+            option({ value: nil }, 'Select POI Type'),
+            %w(Landmark Library Monument Museum Park Religious_Building).map { |type|
+              option({ value: type.gsub('_', '') }, type.gsub('_', ' '))
+            },
+          ]),
+          Google::Map.new(
+            center: current_location,
+            zoom: 14,
+            neighborhood_id: Store.state.selected_neighborhood_id,
+            poi_type: Store.state.selected_poi_type,
+          ),
+        ])
       end,
     ])
+  end
+
+  def neighborhoods
+    Store.state.neighborhoods
   end
 
   def current_location
@@ -38,32 +63,74 @@ module Google
   class Map
     include Clearwater::BlackBoxNode
 
-    attr_reader :map
+    attr_reader :map, :poi
 
-    def initialize(center:, zoom:)
+    def initialize(center:, zoom:, neighborhood_id:, poi_type: nil)
       @center = LatLng.new(*center)
       @zoom = zoom
+      @neighborhood_id = neighborhood_id
+      @poi_type = poi_type
     end
 
     def node
       Clearwater::Component.div(
         style: {
-          height: '600px',
+          height: '75vh',
         },
       )
     end
 
     def mount element
-      @map = `new google.maps.Map({
-        center: #{@center.to_n},
-        zoom: #@zoom,
-      })`
+      @map = `new google.maps.Map(
+        #{element.to_n},
+        {
+          center: #{@center.to_n},
+          zoom: #@zoom,
+          disableDefaultUI: true,
+        }
+      )`
+      @poi = Store.state.points_of_interest.map { |poi|
+        POI.new(poi, `new google.maps.Marker({
+          position: #{LatLng.new(*poi.coordinates)},
+          visible: true,
+          map: #@map,
+        })`)
+      }
     end
 
     def update previous
       @map = previous.map
+      @poi = previous.poi
 
       `#@map.setCenter(#@center)`
+
+      @poi.each do |poi|
+        poi.visible = visible?(poi)
+      end
+    end
+
+    def visible? poi
+      (@poi_type.nil? || @poi_type == 'null' || poi.type == @poi_type) &&
+      (@neighborhood_id.nil? || @neighborhood_id == 'null' || poi.neighborhood_id == @neighborhood_id)
+    end
+
+    class POI
+      def initialize poi, marker
+        @poi = poi
+        @marker = marker
+      end
+
+      def neighborhood_id
+        @poi.neighborhood_id
+      end
+
+      def type
+        @poi.type
+      end
+
+      def visible= value
+        `#@marker.setVisible(!!value)`
+      end
     end
   end
 
