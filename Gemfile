@@ -10,6 +10,7 @@ gem 'neo4j'
 gem 'pry'
 
 group :development do
+  gem 'mechanize'
   gem 'rerun'
   gem 'rake'
 end

@@ -19,6 +19,8 @@ class Monument
   property :name, type: String
   property :coordinates
   property :address, type: String
+  property :image_urls, type: String
+  property :description, type: String
 
   has_one :out, :neighborhood, type: :IN_NEIGHBORHOOD, model_class: :Neighborhood
 end
@@ -29,6 +31,9 @@ class Library
   property :name, type: String
   property :coordinates
   property :address, type: String
+  property :image_urls, type: String
+  property :description, type: String
+
 
   has_one :out, :neighborhood, type: :IN_NEIGHBORHOOD, model_class: :Neighborhood
 end
@@ -39,6 +44,8 @@ class Museum
   property :name, type: String
   property :coordinates
   property :address, type: String
+  property :image_urls, type: String
+  property :description, type: String
 
   has_one :out, :neighborhood, type: :IN_NEIGHBORHOOD, model_class: :Neighborhood
 end
@@ -49,6 +56,8 @@ class Park
   property :name, type: String
   property :coordinates
   property :address, type: String
+  property :image_urls, type: String
+  property :description, type: String
 
   has_one :out, :neighborhood, type: :IN_NEIGHBORHOOD, model_class: :Neighborhood
 end
@@ -59,6 +68,8 @@ class Landmark
   property :name, type: String
   property :coordinates
   property :address, type: String
+  property :image_urls, type: String
+  property :description, type: String
 
   has_one :out, :neighborhood, type: :IN_NEIGHBORHOOD, model_class: :Neighborhood
 end
@@ -69,6 +80,8 @@ class ReligiousBuilding
   property :name, type: String
   property :coordinates
   property :address, type: String
+  property :image_urls, type: String
+  property :description, type: String
 
   has_one :out, :neighborhood, type: :IN_NEIGHBORHOOD, model_class: :Neighborhood
 end
