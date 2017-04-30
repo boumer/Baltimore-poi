@@ -37,3 +37,5 @@ end
 
 SelectNeighborhood = Action.with_attributes(:neighborhood_id)
 SelectPOIType = Action.with_attributes(:type)
+
+SelectPOI = Action.with_attributes(:poi)

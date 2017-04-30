@@ -8,6 +8,7 @@ class AppState < GrandCentral::Model
     :neighborhoods,
     :user_location,
     :points_of_interest,
+    :selected_poi,
     :selected_neighborhood_id,
     :selected_poi_type,
   )
@@ -38,6 +39,8 @@ Store = GrandCentral::Store.new(initial_state) do |state, action|
     state.update(selected_neighborhood_id: action.neighborhood_id)
   when SelectPOIType
     state.update(selected_poi_type: action.type)
+  when SelectPOI
+    state.update(selected_poi: action.poi)
   else
     state
   end

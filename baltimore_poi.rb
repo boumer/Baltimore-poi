@@ -39,6 +39,8 @@ class BaltimorePOI < Roda
               coordinates: point.coordinates,
               type: point.class.name,
               neighborhood_id: point.neighborhood_id,
+              image_url: point.image_urls,
+              description: point.description,
             }
           },
         }
@@ -52,6 +54,12 @@ class BaltimorePOI < Roda
     <meta name="viewport" content="initial-scale=1.0">
     <meta charset="utf-8" />
     <title>Baltimore POI</title>
+    <style>
+      @keyframes fade-in {
+        from { opacity: 0 }
+        to   { opacity: 1 }
+      }
+    </style>
   </head>
 
   <body>
