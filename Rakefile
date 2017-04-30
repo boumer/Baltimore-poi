@@ -34,6 +34,9 @@ namespace :db do
       Landmark => 'landmarks'
     }.each do |klass, file|
       puts "Seeding #{klass}"
+      coordinates_map = klass.all.each_with_object({}) do |model, hash|
+        hash[model.address] = model.coordinates
+      end
       klass.delete_all
       CSV.foreach("data/#{file}.csv", headers: true) do |row|
         hash = row.to_hash
@@ -50,6 +53,7 @@ namespace :db do
           hash["neighborhood"] = hash.delete("district")
         end
         hash["neighborhood"] = Neighborhood.find_or_create_by(name: hash.fetch("neighborhood"))
+        hash["coordinates"] = coordinates_map[hash["address"]]
         klass.create hash
       end
     end
